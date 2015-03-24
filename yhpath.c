@@ -19,11 +19,13 @@ int propath(char *buff, int len, char *errinfo, int errlen)
 	ret = readlink("/proc/self/exe", path, syslen);
     if (ret < 0){
         snprintf(errinfo, errlen, "propath(), readlink() error: %s", strerror(errno));
+        free(path);
         return -1;
     } else if (ret == syslen-1) { 
         // 如果缓冲满了, 缓冲path中被填充的内容大小为 syslen - 1
         // readlink不会造成溢出, 但可能会造成path放不下剩余内容, 造成路径不足
         snprintf(errinfo, errlen, "propath() call readlink(): buffer is too small");
+        free(path);
         return -1;
     }
 
@@ -31,10 +33,12 @@ int propath(char *buff, int len, char *errinfo, int errlen)
     if (strlen(path) >= len) {
         snprintf(errinfo, errlen, "propath() failed: buffer is too small");
         printf("len is too small\n");
+        free(path);
         return -1;
     }
 
 	strncpy(buff, path, len);
+    free(path);
 	return ret;
 }
 
